@@ -20,10 +20,12 @@ if __name__ == '__main__':
     # f.close()
 
     # Run forever until interrupted
-    r = requests.get(url=node)
+    r = requests.get(url=node, headers={
+                     'Authorization': 'Token e9697a598203554fa1e1e59f590f4b2e87a662be'})
     # Handle non-json response
     try:
         data = r.json()
+        print(data)
     except ValueError:
         print("Error:  Non-json response")
         print("Response returned:")
