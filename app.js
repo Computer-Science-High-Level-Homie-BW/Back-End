@@ -1,220 +1,144 @@
-const adv = require('./axiosConfig');
-const travel = require('./dfs');
+const adv = require("./axiosConfig");
 
 let graph = {};
-
-var traversalPath = [];
-
-var backwardsPath = [];
-
+let traversalPath = [];
+let backwardsPath = [];
 const nameChanged = false;
 
 function oppositeDir(dir) {
-    var result = '';
+  let result = "";
 
-    if (dir == 'n') {
-        result = 's';
-    } else if (dir == 's') {
-        result = 'n';
-    } else if (dir == 'w') {
-        result = 'e';
-    } else if (dir == 'e') {
-        result = 'w';
-    }
+  if (dir == "n") {
+    result = "s";
+  } else if (dir == "s") {
+    result = "n";
+  } else if (dir == "w") {
+    result = "e";
+  } else if (dir == "e") {
+    result = "w";
+  }
 
-    return result;
+  return result;
 }
 
-var currentRoom = null;
-var roomCD = 16;
+let roomCD = 16; // to cover bases... if loop() starts too soon, currentRoom is still null and fx breaks
 
 adv
-    .get('init')
-    .then(res => {
-        console.log('Init: ', res.data);
+  .get("init")
+  .then((res) => {
+    console.log("Init: ", res.data);
 
-        currentRoom = res.data;
+    currentRoom = res.data;
 
-        roomCD = currentRoom.cooldown;
-    })
-    .catch(err => console.error(err));
+    console.log("ID: ", currentRoom.room_id);
+    console.log("Exits: ", currentRoom.exits);
 
+    roomCD = currentRoom.cooldown;
+  })
+  .catch((err) => console.error(err));
 
 function loop() {
-    console.log(' >> Looping ...');
+  console.log(" >> Looping ...");
 
-    let roomID = currentRoom.room_id;
+  let roomID = currentRoom.room_id;
 
-    let inv = [];
-    let treasures = [];
-    const takeUber = (currentId, targetId) => {
-        const directions = travel(currentId, targetId);
-        directions.forEach(direction => {
+  if (!graph[roomID]) {
+    graph[roomID] = {};
+  }
+
+  currentRoom.exits.forEach((exit) => {
+    if (graph[roomID][exit] == undefined) {
+      graph[roomID][exit] = "?";
+    }
+  });
+
+  let moveOptions = [];
+
+  for (let key in graph[roomID]) {
+    if (graph[roomID][key] == "?") {
+      moveOptions.push(key);
+    }
+  }
+
+  console.log("Move options: ", moveOptions);
+
+  if (moveOptions.length == 0 && backwardsPath.length) {
+    console.log("Oops! At dead end. Moving backwards.");
+
+    const movedBack = backwardsPath.pop();
+
+    traversalPath.push(movedBack);
+
+    const backRoomID = graph[roomID][movedBack].toString();
+    console.log("Back room ID: ", backRoomID);
+
+    setTimeout(() => {
+      console.log("In Set Timeout Fx for Dead End");
+
+      adv
+        .post("move", {direction: movedBack, next_room_id: backRoomID})
+        .then((res) => {
+          currentRoom = res.data;
+          roomCD = res.data.cooldown;
+          console.log(
+            "Reversed! I'm now in room",
+            currentRoom.room_id,
+            "cd: ",
+            roomCD,
+          );
+
+          // Recursion
+          if (Object.keys(graph).length !== 500) {
+            console.log("Moved from dead end, repeating loop.");
             setTimeout(() => {
-                adv.post('move', { direction }).then(res => {
-                    roomCD = res.data.cooldown;
-                    currentRoom = res.data;
-                });
+              loop();
             }, roomCD * 1000);
-        });
-    };
+          }
+        })
+        .catch((err) => console.log("Dead End POST ERR:", err.message));
+    }, roomCD * 1000);
+  } else if (moveOptions.length == 0 && backwardsPath.length == 0) {
+    console.log("Dead end and can't go back... Graph complete?");
+    console.log("Graph length @ Dead End: ", Object.keys(graph).length);
+  } else if (moveOptions.length > 0) {
+    let nextMove = moveOptions[0];
+    moveOptions = [];
 
-    console.log('Start loop at room #: ', currentRoom.room_id);
+    let backwardsMove = oppositeDir(nextMove);
+    backwardsPath.push(backwardsMove);
 
+    traversalPath.push(nextMove);
+    console.log("PUSHED MOVE");
 
-    if (!graph[roomID]) {
-        graph[roomID] = {}; // []
-    }
+    setTimeout(() => {
+      adv
+        .post("move", {direction: nextMove})
+        .then((res) => {
+          console.log("New Room: ", res.data);
 
-    currentRoom.exits.forEach(exit => {
+          let prevRoomID = roomID;
+          currentRoom = res.data;
 
-        if (graph[roomID][exit] == undefined) {
-            graph[roomID][exit] = '?';
-        }
-    });
+          graph[prevRoomID][nextMove] = currentRoom.room_id;
 
-    var moveOptions = [];
+          let newRoomID = currentRoom.room_id;
 
-    for (var key in graph[roomID]) {
-        if (graph[roomID][key] == '?') {
-            moveOptions.push(key);
-        }
-    }
+          graph[newRoomID][backwardsMove] = prevRoomID;
 
+          console.log("Replaced ?s: ", graph);
 
-    if (moveOptions.length == 0 && backwardsPath.length) {
-
-        const movedBack = backwardsPath.pop();
-
-        traversalPath.push(movedBack);
-
-        const backRoomID = graph[roomID][movedBack].toString();
-
-        setTimeout(() => {
-
-            adv
-                .post('move', { direction: movedBack, next_room_id: backRoomID })
-                .then(res => {
-                    currentRoom = res.data;
-                    roomCD = res.data.cooldown;
-                    console.log(
-                        "Reversed! I'm now in room",
-                        currentRoom.room_id,
-                        'cd: ',
-                        roomCD
-                    );
-
-                    if (Object.keys(graph).length !== 500) {
-                        setTimeout(() => {
-                            loop();
-                        }, roomCD * 1000);
-                    }
-                })
-                .catch(err => console.log('Dead End POST ERR:', err.message));
-        }, roomCD * 1000);
-    }
-
-    else if (moveOptions.length == 0 && backwardsPath.length == 0) {
-        console.log("Dead end and can't go back... Graph complete?");
-        console.log('Graph length @ Dead End: ', Object.keys(graph).length);
-        return graph;
-    }
-
-
-    else if (moveOptions.length > 0) {
-
-
-        var nextMove = moveOptions[0];
-        moveOptions = [];
-
-        var backwardsMove = oppositeDir(nextMove);
-        backwardsPath.push(backwardsMove);
-
-        traversalPath.push(nextMove);
-
-        setTimeout(() => {
-            adv
-                .post('move', { direction: nextMove })
-                .then(res => {
-                    console.log('New Room: ', res.data);
-
-                    var prevRoomID = roomID;
-                    currentRoom = res.data;
-
-                    graph[prevRoomID][nextMove] = currentRoom.room_id;
-
-                    var newRoomID = currentRoom.room_id;
-
-                    if (currentRoom.room_id === 1) {
-                        setTimeout(() => {
-                            adv.post('status').then(res => {
-                                inv = [...res.data.inventory];
-                                selling(inv);
-                            });
-                        }, 1000);
-                    }
-
-                    if (currentRoom.items.length) {
-                        setTimeout(() => {
-                            adv
-                                .post('status')
-                                .then(res => {
-                                    roomCD = res.data.cooldown;
-                                    if (res.data.inventory.length < 10) {
-                                        treasures = [...currentRoom.items];
-                                        pickingItems(treasures);
-                                    }
-                                })
-                                .catch(err => console.log('I got youuuuu', err));
-                        }, roomCD * 1000);
-                    }
-
-                    if (currentRoom.title.toLowerCase().includes('shrine')) {
-                        adv.post('pray').then(res => (roomCD = res.data.cooldown));
-                    }
-
-                    if (currentRoom.room_id === 467 && !nameChanged) {
-                        adv
-                            .post('change_name', { name: 'Scavenger Hunter', confirm: 'aye' })
-                            .then(res => {
-                                roomCD = res.data.cooldown;
-                                nameChanged = true;
-                                takeUber(467, 250);
-                            });
-                    }
-
-                    if (currentRoom.room_id === 250) {
-                        getLastProof();
-                    }
-
-                    if (!graph[newRoomID]) {
-                        graph[newRoomID] = {};
-                    }
-
-                    currentRoom.exits.forEach(exit => {
-                        if (!graph[newRoomID][exit]) {
-                            graph[newRoomID][exit] = '?';
-                        }
-                    });
-
-                    graph[newRoomID][backwardsMove] = prevRoomID;
-
-                    console.log('Replaced ?s: ', graph);
-
-                    roomCD = res.data.cooldown;
-
-                    if (Object.keys(graph).length !== 500) {
-                        console.log('Graph not 500 yet');
-                        setTimeout(() => {
-                            loop();
-                        }, roomCD * 1000);
-                    }
-                })
-                .catch(err => console.log('POST ERR:', err.message));
-        }, roomCD * 1000);
-    }
+          if (Object.keys(graph).length !== 500) {
+            console.log("Graph not 500 yet");
+            setTimeout(() => {
+              loop();
+            }, roomCD * 1000);
+          }
+        })
+        .catch((err) => console.log("POST ERR:", err.message));
+    }, roomCD * 1000);
+  }
 }
 
 setTimeout(() => {
-    loop();
+  loop();
 }, roomCD * 1000);
