@@ -21,7 +21,7 @@ function oppositeDir(dir) {
   return result;
 }
 
-let roomCD = 16; // to cover bases... if loop() starts too soon, currentRoom is still null and fx breaks
+let roomCD = 17; 
 
 adv
   .get("init")
@@ -38,7 +38,7 @@ adv
   .catch((err) => console.error(err));
 
 function loop() {
-  console.log(" >> Looping ...");
+  console.log(" Beginning Loop...");
 
   let roomID = currentRoom.room_id;
 
@@ -123,6 +123,20 @@ function loop() {
 
           let newRoomID = currentRoom.room_id;
 
+          graph[newRoomID][backwardsMove] = prevRoomID;
+
+          if (!graph[newRoomID]) {
+            graph[newRoomID] = {};
+          }
+
+          // Add newroom exit values
+          currentRoom.exits.forEach(exit => {
+          if (!graph[newRoomID][exit]) {
+            graph[newRoomID][exit] = '?';
+            }
+          });
+
+          // Update graph values of new current room with prevRoom ID
           graph[newRoomID][backwardsMove] = prevRoomID;
 
           console.log("Replaced ?s: ", graph);
