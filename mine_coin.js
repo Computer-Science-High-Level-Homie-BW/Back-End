@@ -3,17 +3,21 @@ const shajs = require("sha.js");
 
 let last_proof = null;
 
-const getLastProof = () => {
-  axios
-    .get("https://lambda-treasure-hunt.herokuapp.com/api/bc/last_proof/", {
-      headers: {
-        Authorization: "e9697a598203554fa1e1e59f590f4b2e87a662be",
+const getLastProof = async () => {
+  try {
+    let response = await axios.get(
+      "https://lambda-treasure-hunt.herokuapp.com/api/bc/last_proof/",
+      {
+        headers: {
+          Authorization: "e9697a598203554fa1e1e59f590f4b2e87a662be",
+        },
       },
-    })
-    .then((response) => {
-      last_proof = response.data.proof;
-    })
-    .catch((err) => console.log(err));
+    );
+
+    last_proof = response.data.proof;
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 getLastProof();
