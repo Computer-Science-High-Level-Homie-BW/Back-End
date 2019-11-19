@@ -1,3 +1,5 @@
+// Run `node mine_coin.js` once player is in mine room
+
 const axios = require("axios");
 const shajs = require("sha.js");
 
