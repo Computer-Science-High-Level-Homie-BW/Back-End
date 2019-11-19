@@ -5,7 +5,7 @@ let last_proof = null;
 
 const getLastProof = async () => {
   try {
-    let response = await axios.get(
+    const response = await axios.get(
       "https://lambda-treasure-hunt.herokuapp.com/api/bc/last_proof/",
       {
         headers: {
@@ -42,16 +42,22 @@ while (!valid_proof(last_proof, proof)) {
   proof = Math.floor(Math.random() * 1000000000);
 }
 
-axios
-  .post("https://lambda-treasure-hunt.herokuapp.com/api/bc/mine", {
-    proof: proof,
-    headers: {
-      Authorization: "e9697a598203554fa1e1e59f590f4b2e87a662be",
-    },
-  })
-  .then((response) => {
+const mineCoin = async () => {
+  try {
+    const response = await axios.post(
+      "https://lambda-treasure-hunt.herokuapp.com/api/bc/mine",
+      {
+        proof: proof,
+        headers: {
+          Authorization: "e9697a598203554fa1e1e59f590f4b2e87a662be",
+        },
+      },
+    );
+
     console.log("Proof found", response);
-  })
-  .catch((err) => {
-    console.log("proof not found", err);
-  });
+  } catch (error) {
+    console.log("error finding proof", error);
+  }
+};
+
+mineCoin();
