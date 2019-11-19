@@ -22,18 +22,14 @@ if __name__ == '__main__':
 
     move_url = "https://lambda-treasure-hunt.herokuapp.com/api/adv/move/"
 
-    send = {
+    move = requests.post(url=move_url, json={
         "direction": "n"
-    }
-
-    move = requests.post(url=move_url, data=json.dumps(send), headers={
+    }, headers={
         'Authorization': 'Token e9697a598203554fa1e1e59f590f4b2e87a662be',
         'content-type': 'application/json',
     })
 
-    move_data = move.json()
-
-    print(move_data)
+    print(move)
 
     # graph[move_data["room_id"]] = {}
 
