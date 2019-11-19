@@ -30,33 +30,33 @@ def valid_proof(last_proof, proof):
 
 if __name__ == '__main__':
 
-    proof_of_work(123456)
+    # proof_of_work(123456)
 
-    # node_last_proof = "https://lambda-treasure-hunt.herokuapp.com/api/bc/last_proof"
-    # node_mine = "https://lambda-treasure-hunt.herokuapp.com/api/bc/mine/"
+    node_last_proof = "https://lambda-treasure-hunt.herokuapp.com/api/bc/last_proof"
+    node_mine = "https://lambda-treasure-hunt.herokuapp.com/api/bc/mine/"
 
-    # coins_mined = 0
+    coins_mined = 0
 
-    # f = open("token.txt", "r")
-    # id = f.read()
-    # print("Token is", id)
-    # f.close()
+    f = open("token.txt", "r")
+    id = f.read()
+    print("Token is", id)
+    f.close()
 
-    # while True:
-    #     # Get the last proof from the server
-    #     r = requests.get(url=node_last_proof)
-    #     data = r.json()
-    #     new_proof = proof_of_work(data.get('proof'))
+    while True:
+        # Get the last proof from the server
+        r = requests.get(url=node_last_proof)
+        data = r.json()
+        new_proof = proof_of_work(data.get('proof'))
 
-    #     if new_proof is not None:
-    #         post_data = {"proof": new_proof,
-    #                      "id": id}
+        if new_proof is not None:
+            post_data = {"proof": new_proof,
+                         "id": id}
 
-    #         r = requests.post(url=node_mine, json=post_data)
-    #         data = r.json()
-    #         print(data)
-    #         if data.get('message') == 'New Block Forged':
-    #             coins_mined += 1
-    #             print("Total coins mined: " + str(coins_mined))
-    #         else:
-    #             print(data.get('message'))
+            r = requests.post(url=node_mine, json=post_data)
+            data = r.json()
+            print(data)
+            if data.get('message') == 'New Block Forged':
+                coins_mined += 1
+                print("Total coins mined: " + str(coins_mined))
+            else:
+                print(data.get('message'))
