@@ -34,7 +34,7 @@ const mine_coin = async () => {
 
     // current dificulty 6 - 6 zeros
     let leadingZeros = '000000';
-    console.log(guess_hash)
+    // console.log(guess_hash);
     return guess_hash.startsWith(leadingZeros);
   };
 
@@ -44,25 +44,29 @@ const mine_coin = async () => {
     proof = Math.floor(Math.random() * 1000000000);
   }
 
-  // const mineCoin = async () => {
-  //   try {
-  //     const response = await axios.post(
-  //       'https://lambda-treasure-hunt.herokuapp.com/api/bc/mine',
-  //       {
-  //         proof: proof,
-  //         headers: {
-  //           Authorization: 'Token e9697a598203554fa1e1e59f590f4b2e87a662be'
-  //         }
-  //       }
-  //     );
+  console.log(('PROOF FOUND', proof));
 
-  //     console.log('Proof found', response);
-  //   } catch (error) {
-  //     console.log('error finding proof', error);
-  //   }
-  // };
+  const SEND_PROOF = async () => {
+    try {
+      const response = await axios.post(
+        'https://lambda-treasure-hunt.herokuapp.com/api/bc/mine',
+        {
+          proof: proof
+        },
+        {
+          headers: {
+            Authorization: 'Token e9697a598203554fa1e1e59f590f4b2e87a662be'
+          }
+        }
+      );
 
-  // mineCoin();
+      console.log('Proof found');
+    } catch (error) {
+      console.log('error finding proof');
+    }
+  };
+
+  SEND_PROOF();
 };
 
 mine_coin();
