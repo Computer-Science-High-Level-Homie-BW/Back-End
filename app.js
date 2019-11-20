@@ -54,6 +54,26 @@ function loop() {
         });
     };
 
+    const selling = inv => {
+      if (!inv.length) {
+        if (!nameChanged) {
+          takePath(1, 467);
+        }
+        return;
+      }
+      setTimeout(() => {
+        adv
+          .post('sell', { name: 'treasure', confirm: 'yes' })
+          .then(res => {
+            res.data.messages.forEach(msg => console.log(msg));
+            roomCD = res.data.cooldown;
+            inv.pop(0);
+            selling(inv);
+          })
+          .catch(err => console.log('Selling error', err));
+      }, roomCD * 1000);
+    };
+
   if (!graph[roomID]) {
     graph[roomID] = {};
   }
