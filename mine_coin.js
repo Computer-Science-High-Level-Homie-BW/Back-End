@@ -23,25 +23,26 @@ const mine_coin = async () => {
 
   console.log('END', last_proof);
 
-  // const hash = (attempt) => {
-  //   return shajs('sha256')
-  //     .update(attempt)
-  //     .digest('hex');
-  // };
+  const hash = (attempt) => {
+    return shajs('sha256')
+      .update(attempt)
+      .digest('hex');
+  };
 
-  // const valid_proof = (last_proof, proof) => {
-  //   const guess_hash = hash(`${last_proof}${proof}`);
+  const valid_proof = (last_proof, proof) => {
+    const guess_hash = hash(`${last_proof}${proof}`);
 
-  //   let leadingZeros = '00000000';
+    // current dificulty 6 - 6 zeros
+    let leadingZeros = '000000';
+    console.log(guess_hash)
+    return guess_hash.startsWith(leadingZeros);
+  };
 
-  //   return guess_hash.startsWith(leadingZeros);
-  // };
+  let proof = Math.floor(Math.random() * 1000000000);
 
-  // let proof = Math.floor(Math.random() * 1000000000);
-
-  // while (!valid_proof(last_proof, proof)) {
-  //   proof = Math.floor(Math.random() * 1000000000);
-  // }
+  while (!valid_proof(last_proof, proof)) {
+    proof = Math.floor(Math.random() * 1000000000);
+  }
 
   // const mineCoin = async () => {
   //   try {
