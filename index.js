@@ -1,6 +1,6 @@
 const adv = require("./advUtility");
 const travel = require("./dfs");
-const getLastProof = require("./blockchain");
+const mine_coin = require("./mine_coin");
 
 // Create Empty Graph
 let graph = {};
@@ -277,7 +277,7 @@ function initGameLoop() {
           }
 
           if (currentRoom.room_id === 250) {
-            getLastProof();
+            mine_coin();
           }
 
           if (!graph[newRoomID]) {
