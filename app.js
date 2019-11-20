@@ -21,7 +21,7 @@ function oppositeDir(dir) {
   return result;
 }
 
-let roomCD = 16; // to cover bases... if loop() starts too soon, currentRoom is still null and fx breaks
+let roomCD = 17;
 
 adv
   .get("init")
@@ -38,9 +38,41 @@ adv
   .catch((err) => console.error(err));
 
 function loop() {
-  console.log(" >> Looping ...");
+  console.log(" Beginning Loop...");
 
   let roomID = currentRoom.room_id;
+
+    const takePath = (currentId, targetId) => {
+        const directions = travel(currentId, targetId);
+        directions.forEach(direction => {
+            setTimeout(() => {
+                adv.post('move', { direction }).then(res => {
+                    roomCD = res.data.cooldown;
+                    currentRoom = res.data;
+                });
+            }, roomCD * 1000);
+        });
+    };
+
+    const selling = inv => {
+      if (!inv.length) {
+        if (!nameChanged) {
+          takePath(1, 467);
+        }
+        return;
+      }
+      setTimeout(() => {
+        adv
+          .post('sell', { name: 'treasure', confirm: 'yes' })
+          .then(res => {
+            res.data.messages.forEach(msg => console.log(msg));
+            roomCD = res.data.cooldown;
+            inv.pop(0);
+            selling(inv);
+          })
+          .catch(err => console.log('Selling error', err));
+      }, roomCD * 1000);
+    };
 
   if (!graph[roomID]) {
     graph[roomID] = {};
@@ -123,6 +155,20 @@ function loop() {
 
           let newRoomID = currentRoom.room_id;
 
+          graph[newRoomID][backwardsMove] = prevRoomID;
+
+          if (!graph[newRoomID]) {
+            graph[newRoomID] = {};
+          }
+
+          // Add newroom exit values
+          currentRoom.exits.forEach(exit => {
+          if (!graph[newRoomID][exit]) {
+            graph[newRoomID][exit] = '?';
+            }
+          });
+
+          // Update graph values of new current room with prevRoom ID
           graph[newRoomID][backwardsMove] = prevRoomID;
 
           console.log("Replaced ?s: ", graph);
