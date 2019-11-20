@@ -11,7 +11,7 @@ const getLastProof = async () => {
       "https://lambda-treasure-hunt.herokuapp.com/api/bc/last_proof/",
       {
         headers: {
-          Authorization: "e9697a598203554fa1e1e59f590f4b2e87a662be",
+          Authorization: "Token e9697a598203554fa1e1e59f590f4b2e87a662be",
         },
       },
     );
@@ -51,7 +51,7 @@ const mineCoin = async () => {
       {
         proof: proof,
         headers: {
-          Authorization: "e9697a598203554fa1e1e59f590f4b2e87a662be",
+          Authorization: "Token e9697a598203554fa1e1e59f590f4b2e87a662be",
         },
       },
     );
