@@ -21,7 +21,7 @@ function oppositeDir(dir) {
   return result;
 }
 
-let roomCD = 17; 
+let roomCD = 17;
 
 adv
   .get("init")
@@ -41,6 +41,18 @@ function loop() {
   console.log(" Beginning Loop...");
 
   let roomID = currentRoom.room_id;
+
+    const takePath = (currentId, targetId) => {
+        const directions = travel(currentId, targetId);
+        directions.forEach(direction => {
+            setTimeout(() => {
+                adv.post('move', { direction }).then(res => {
+                    roomCD = res.data.cooldown;
+                    currentRoom = res.data;
+                });
+            }, roomCD * 1000);
+        });
+    };
 
   if (!graph[roomID]) {
     graph[roomID] = {};
