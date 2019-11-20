@@ -277,6 +277,7 @@ function initGameLoop() {
           }
 
           if (currentRoom.room_id === 250) {
+            console.log("START MINING COIN")
             mine_coin();
           }
 
