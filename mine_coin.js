@@ -8,7 +8,7 @@ const mine_coin = async () => {
       'https://lambda-treasure-hunt.herokuapp.com/api/bc/last_proof/',
       {
         headers: {
-          Authorization: 'Token 308e0075ee15546fdcf031167af4c40346ad11fa'
+          Authorization: 'Token #'
         }
       }
     );
@@ -44,7 +44,7 @@ const mine_coin = async () => {
         },
         {
           headers: {
-            Authorization: 'Token 308e0075ee15546fdcf031167af4c40346ad11fa'
+            Authorization: 'Token #'
           }
         }
       );
