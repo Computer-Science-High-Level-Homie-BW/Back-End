@@ -1,5 +1,4 @@
 const adv = require("./advUtility");
-const mine_coin = require("./mine_coin");
 
 // Create Empty Graph
 let graph = {};
